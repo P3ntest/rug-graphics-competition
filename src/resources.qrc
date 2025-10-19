@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/fragshader.glsl</file>
+        <file>shaders/vertshader.glsl</file>
+        <file>shaders/waterfrag.glsl</file>
+        <file>shaders/watervert.glsl</file>
+        <file>shaders/g_buffer_frag.glsl</file>
+        <file>shaders/g_buffer_vert.glsl</file>
+        <file>shaders/lighting_frag.glsl</file>
+        <file>shaders/quad_vert.glsl</file>
+        <file>shaders/lighting_frag.glsl</file>
+
+        <file>textures/cat_diff.png</file>
+        <file>textures/cat_norm.png</file>
+        <file>textures/cat_spec.png</file>
+        <file>textures/lamp_diffuse.png</file>
+        <file>textures/lamp_emission.png</file>
+        <file>textures/sign_diffuse.png</file>
+        <file>textures/sign_emission.png</file>
+        <file>textures/concrete_wall.png</file>
+        <file>textures/apart_diffuse.png</file>
+        <file>textures/apart_emission.png</file>
+        <file>models/apart.obj</file>
+        <file>models/cat.obj</file>
+        <file>models/water.obj</file>
+        <file>models/sceneobj.obj</file>
+        <file>models/sign.obj</file>
+        <file>models/lamps.obj</file>
+    </qresource>
+</RCC>
