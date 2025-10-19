@@ -16,7 +16,7 @@ uniform mat4 projection;
 
 vec3 ssrRaycast(vec3 O, vec3 R) {
     float rayLength = 0.0;
-    const int maxSteps = 100;
+    const int maxSteps = 1000;
     float stepSize = 0.1;
 
     for(int i = 0; i < maxSteps; i++) {
@@ -41,7 +41,8 @@ vec3 ssrRaycast(vec3 O, vec3 R) {
         if(rayDepth > sceneDepth + bias) {
             // hit!
 
-            vec3 reflectedColor = texture(gEmission, screenTexCoords).rgb;
+            vec3 reflectedColor = texture(gAlbedoSpec, screenTexCoords).rgb * 0.1 +
+                texture(gEmission, screenTexCoords).rgb;
 
             // fade todo and potential edge fade
 
@@ -61,6 +62,7 @@ void main() {
     float Reflectiveness = AlbedoSpec.a;
 
     FragColor = vec4(Normal * 0.5 + 0.5, 1.0); // Map normal from [-1, 1] to [0, 1] range
+    // return;
 
     // Example access: Visualize the Depth buffer (from gPosition's Z component)
     // float depth = -FragPos.z / 20;
@@ -69,7 +71,7 @@ void main() {
 
     // Standard lighting calculation goes here, using FragPos, Normal, and Albedo.
 
-    vec3 diffuseLight = max(dot(normalize(Normal), -lightDir), 0.0) * vec3(0.3);
+    vec3 diffuseLight = max(dot(normalize(Normal), -lightDir), 0.0) * vec3(0.6);
     vec3 ambientLight = vec3(0.1);
 
     // compute specular

@@ -14,7 +14,7 @@ The following GIF showcases the real-time rendered screen space reflections effe
 
 All models have been hand made for the competition using Blender. The RUG Logo for the emissive sign was sourced from an official RUG publication and cropped to fit the model. Two external textures under CC0 license were used for the concrete floor and apartment building facade:
 
-- [Facade](https://ambientcg.com/view?id=Facade002)
+- [Facade](https://ambientcg.com/view?id=Facade006)
 - [Concrete Wall](https://polyhaven.com/a/concrete_wall_006)
 
 ## Inspiration
@@ -30,7 +30,7 @@ From my research I have found that the screen space reflection ray tracing can b
 
 ## The water shader
 
-The water shader was made using a custom 2d wave height function, consisting of a mix of sin and perlin noise.
+The water shader was made using a custom 2d wave height function.
 The normals were calculated not analytically but by sampling the height at small offsets and construct the tangent and bitangent vectors from there. This approach was easier to implement and gave satisfactory results, while allowing for completely dynamic waves.
 The water plane needs more geometry that just two triangles to look good, so that waves can be represented properly. Ideally, a tesselation shader could be used to increase the geometry density near the camera, but due to time constraints I simply created a grid mesh in Blender with enough subdivisions.
 The water shader can be found in the `watervert.glsl` shader.

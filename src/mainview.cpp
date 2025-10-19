@@ -112,7 +112,7 @@ void MainView::initializeGL()
   Actor apart(":/models/apart.obj", gBufferShader);
   apart.transform.setToIdentity();
   apart.setDiffuseTexture(QImage(":/textures/apart_diffuse.png"));
-  apart.setEmissionTexture(QImage(":/textures/apart_emission.png"));
+  // apart.setEmissionTexture(QImage(":/textures/apart_emission.png"));
 
   actors.push_back(apart);
 

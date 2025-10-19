@@ -15,76 +15,91 @@ uniform mat4 projection;
 
 uniform float time;
 
-// Perlin Noise from https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
-float rand(vec2 c) {
-  return fract(sin(dot(c.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
+// --- HELPER FUNCTIONS ---
 
-const float PI = 3.14159265359;
-
-float noise(vec2 p, float freq) {
-  float unit = freq;
-  vec2 ij = floor(p / unit);
-  vec2 xy = mod(p, unit) / unit;
-	//xy = 3.*xy*xy-2.*xy*xy*xy;
-  xy = .5 * (1. - cos(PI * xy));
-  float a = rand((ij + vec2(0., 0.)));
-  float b = rand((ij + vec2(1., 0.)));
-  float c = rand((ij + vec2(0., 1.)));
-  float d = rand((ij + vec2(1., 1.)));
-  float x1 = mix(a, b, xy.x);
-  float x2 = mix(c, d, xy.x);
-  return mix(x1, x2, xy.y);
-}
-
-float pNoise(vec2 p, int res) {
-  float persistance = .5;
-  float n = 0.;
-  float normK = 0.;
-  float f = 4.;
-  float amp = 1.;
-  int iCount = 0;
-  for(int i = 0; i < 50; i++) {
-    n += amp * noise(p, f);
-    f *= 2.;
-    normK += amp;
-    amp *= persistance;
-    if(iCount == res)
-      break;
-    iCount++;
+// Dispersion Relation for Shallow Water
+// Calculates the angular frequency (omega) based on wavenumber (k) and depth (d).
+// omega = sqrt(g * k * tanh(k * d))
+float dispersion_omega(float k, float g, float d) {
+    // We use a small epsilon to prevent issues with very small k or d
+  if(k * d < 0.01) {
+        // Shallow water approximation (tanh(x) ~ x)
+    return sqrt(g * k * k * d);
   }
-  float nf = n / normK;
-  return nf * nf * nf * nf;
+  return sqrt(g * k * tanh(k * d));
 }
 
-// END Perlin Noise
+// Calculates the vertical displacement (height) of a single Airy wave component.
+// Airy waves are purely vertical displacements, simpler than Gerstner waves.
+float getWaveHeightComponent(vec2 xz_pos, float time, float A, float k, vec2 D, float g, float d, float phase_offset) {
+    // 1. Calculate Angular Frequency (omega)
+  float omega = dispersion_omega(k, g, d);
 
-float sin_octaves(float x, int octaves) {
-  float total = 0.0;
-  float frequency = 1.0;
-  float amplitude = 1.0;
-  float maxValue = 0.0; // Used for normalizing result to [0,1]
+    // 2. Calculate the Phase
+    // Phase = (k * (D . xz_pos)) - (omega * time) + phase_offset
+    // D . xz_pos = wave travel distance along its direction
+  float phase = k * dot(D, xz_pos) - omega * time + phase_offset;
 
-  for(int i = 0; i < octaves; i++) {
-    total += sin(x * frequency) * amplitude;
-
-    maxValue += amplitude;
-
-    amplitude *= 0.5;
-    frequency *= 2.0;
-  }
-
-  return total / maxValue;
+    // 3. Return the Height
+  return A * cos(phase);
 }
+
+const float C_GRAVITY = 9.8;    // Gravity (g)
+const float C_DEPTH = 5.0; 
 
 // The height function remains the same
 float waveHeight(vec2 pos, float time) {
-  // return 0;
-  return sin_octaves(pos.x * 2.0 + time + pos.y * 3, 4) * 0.08 +
-    // sin_octaves(pos.x * 1.5 - time * 0.5 + pos.y * 2, 3) * 0.05 +
-    // sin_octaves(pos.x * 0.5 + time * 0.2 + pos.y * 1, 2) * 0.02 +
-    // add some high frequency detail
-    pNoise(pos * 5.0 + vec2(time) * 1.0, 4) * 0.1;
+   // Retrieve environment constants
+  const float g = C_GRAVITY;
+  const float d = C_DEPTH;
+
+  float height = 0.0;
+
+    // --- WAVE COMPONENTS FOR CHOPPY CANAL/RIVER (All Hardcoded) ---
+
+    // Wave 1: Dominant long wave, defining general motion
+  const float A1 = 0.15;
+  const float k1 = 2.0;
+  const vec2 D1 = vec2(1.0, 0.0);
+
+  height += getWaveHeightComponent(pos, time, A1, k1, D1, g, d, 0.0); 
+
+    // Wave 2: Medium wave, crossing direction for chop 
+  const float A2 = 0.08;
+  const float k2 = 4.5;
+  const vec2 D2 = normalize(vec2(0.8, 0.5));
+
+  height += getWaveHeightComponent(pos, time, A2, k2, D2, g, d, 1.2);
+
+    // Wave 3: Small wave, highly choppy
+  const float A3 = 0.05;
+  const float k3 = 8.0;
+  const vec2 D3 = normalize(vec2(0.1, 1.0));
+
+  height += getWaveHeightComponent(pos, time, A3, k3, D3, g, d, 3.5);
+
+    // Wave 4: Tiny, high-frequency ripple 
+  const float A4 = 0.02;
+  const float k4 = 12.0;
+  const vec2 D4 = normalize(vec2(-0.5, -0.7));
+
+  height += getWaveHeightComponent(pos, time, A4, k4, D4, g, d, 5.1);
+
+    // Wave 5: Very high frequency (short wavelength), very small amplitude
+  const float A5 = 0.008;
+  const float k5 = 18.0;
+  const vec2 D5 = normalize(vec2(1.0, -0.2));
+
+  height += getWaveHeightComponent(pos, time, A5, k5, D5, g, d, 6.4); 
+
+    // Wave 6: Micro-ripple, extremely high frequency
+  const float A6 = 0.004;
+  const float k6 = 25.0;
+  const vec2 D6 = normalize(vec2(-0.8, 0.9));
+
+  height += getWaveHeightComponent(pos, time, A6, k6, D6, g, d, 2.7);
+
+  return height * 0.2; // Overall scaling factor
 }
 
 // Correctly calculates the normal based on horizontal world coordinates (a vec2)
@@ -92,7 +107,7 @@ vec3 calculateWorldNormal(vec2 pos, float time) {
   // for debug just straight up 
   // return vec3(0.0, 1.0, 0.0);
 
-  const float epsilon = 0.001; // A small offset
+  const float epsilon = 0.0001; // A small offset
 
   // Tangent in the X direction
   vec3 p1 = vec3(pos.x - epsilon, waveHeight(vec2(pos.x - epsilon, pos.y), time), pos.y);
@@ -123,13 +138,13 @@ void main() {
 
   // 4. Transform normal and position for the fragment shader
   // The normal matrix transforms the calculated world normal into the correct orientation
-  Normal = normalize(inverse(transpose(mat3(view * model))) * worldNormal);
+  Normal = normalize(mat3(view) * worldNormal);
   FragPos = vec3(view * finalWorldPos);
   TexCoords = aTexCoords;
 
-  float reflectiveness = 0.6;
+  float reflectiveness = 0.45;
 
-  AlbedoReflectance = vec4(vec3(0.0, 0.3, 0.5) * 0.7, reflectiveness); // Water color
+  AlbedoReflectance = vec4(vec3(0.0, 0.3, 0.5) * 0.3, reflectiveness); // Water color
 
   // 5. Finally, transform the displaced vertex to clip space
   gl_Position = projection * view * finalWorldPos;
