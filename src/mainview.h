@@ -33,9 +33,6 @@ public:
   ~MainView() override;
 
   // Functions for widget input events
-  void setRotation(int rotateX, int rotateY, int rotateZ);
-  void setScale(float scale);
-  void setShadingMode(ShadingMode shading);
   static QVector<quint8> imageToBytes(const QImage &image);
 
 protected:
