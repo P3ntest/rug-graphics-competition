@@ -8,7 +8,7 @@ This project was made as a submission to the RUG Computer Graphics Course Compet
 
 The following GIF showcases the real-time rendered screen space reflections effect on a water surface in action:
 
-![Recording of the finished project](screenshots/recording.mov)
+![Recording of the finished project](screenshots/recording.gif)
 
 ## Assets
 
