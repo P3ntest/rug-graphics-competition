@@ -1,4 +1,4 @@
-# Screen Space Reflections Shader for OpenGL
+# Screen Space Reflections and Water Shader for OpenGL
 
 This project was made as a submission to the RUG Computer Graphics Course Competition 2025. It implements a screen space reflections (SSR) shader in OpenGL using a deferred rendering pipeline.
 
@@ -6,7 +6,7 @@ This project was made as a submission to the RUG Computer Graphics Course Compet
 
 ## Final Product
 
-The following GIF showcases the real-time rendered screen space reflections effect in action:
+The following GIF showcases the real-time rendered screen space reflections effect on a water surface in action:
 
 ![Recording of the finished project](screenshots/recording.gif)
 
@@ -27,3 +27,18 @@ Early on in the semester I was visiting a friend in Den Haag, NL. During a night
 ## Quick overview of the SSR technique
 
 From my research I have found that the screen space reflection ray tracing can be done on a pixel level, using a pixel-tracer similar to what advanced voxel tracer engines do in 3D. Alternatively, one can step through view( / world) space using a small enough fixed step size. Even though this solution is less accurate and can be more performance intensive if the step size is too small, it seemed easier to implement, so I went with this approach for this project. The SSR algorithm can be found in the `lighting_frag.glsl` shader.
+
+## The water shader
+
+The water shader was made using a custom 2d wave height function, consisting of a mix of sin and perlin noise.
+The normals were calculated not analytically but by sampling the height at small offsets and construct the tangent and bitangent vectors from there. This approach was easier to implement and gave satisfactory results, while allowing for completely dynamic waves.
+The water plane needs more geometry that just two triangles to look good, so that waves can be represented properly. Ideally, a tesselation shader could be used to increase the geometry density near the camera, but due to time constraints I simply created a grid mesh in Blender with enough subdivisions.
+The water shader can be found in the `watervert.glsl` shader.
+
+## Deferred rendering pipeline
+
+Screen space reflections rely on a postprocessing effect using geometry data of the entire screen. Therefore, a deferred rendering pipeline has to be used. I first render the scene geometry into multiple buffers, storing position, normal, albedo, reflectiveness and emission. Then I render a single full screen quad, which has sampler access to the previously rendered buffers. The fragment shader of this quad does all the heavy lifting and acts as a potential image postprocessing step. In this shader, the screen space reflections are calculated and mixed with the rest of the lighting. Finally, the resulting color is output to the default framebuffer. The deferred rendering pipeline can be found in the `mainview.cpp` file.
+
+## Build and run instructions
+
+This QT project should be buildable and runnable using QT Creator. I don't use QT Creator myself, so I included a `sr/run.sh` that I have been using as a convenient way to build and run the project from the terminal.
