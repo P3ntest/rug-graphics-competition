@@ -42,3 +42,7 @@ Screen space reflections rely on a postprocessing effect using geometry data of 
 ## Build and run instructions
 
 This QT project should be buildable and runnable using QT Creator. I don't use QT Creator myself, so I included a `sr/run.sh` that I have been using as a convenient way to build and run the project from the terminal.
+
+### Quick note on missing git history
+
+This project was originally part of a mono repo containing all assignments for the RUG Computer Graphics course. For the purpose of this competition submission, I have extracted only the relevant files for this project, so unfortunately the git history is missing. If you want to see the full history including all assignments, please contact me.
